@@ -1,6 +1,6 @@
 import broadbean as bb
-#from broadbean.plotting import plotter
-plotter = bb.plotter
+from broadbean.plotting import plotter
+#plotter = bb.plotter
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib as mpl
@@ -81,11 +81,13 @@ class Sequencer():
             start[index_ch] += scaled[index_ch]
 
 
-
             if pulse_dict.get('marker1', []):
-                bps[index_ch].marker1 = [(start_time + t, self.marker_length) for t in pulse_dict.get('marker1', [])]
+                for index, t in enumerate(pulse_dict.get('marker1',[])):
+                    bps[index_ch].setSegmentMarker(pulse_dict.get('vary_name')[index_ch], (t, self.marker_length), index+1)
+
             if pulse_dict.get('marker2', []):
-                bps[index_ch].marker2 = [(start_time + t, self.marker_length) for t in pulse_dict.get('marker2', [])]
+                for index, t in enumerate(pulse_dict.get('marker1',[])):
+                    bps[index_ch].setSegmentMarker(pulse_dict.get('vary_name')[index_ch], (t, self.marker_length), index+1)
 
         self.bp_dict[str(ch)][pulse_dict['name']] = bps[index_ch]
         end = start
@@ -116,13 +118,17 @@ class Sequencer():
 
                 area[index_ch] += 0.5*(start[index_ch] * 2 + scaled[index_ch]) * durs[index_ramp]
 
-                bps[index_ch].insertSegment(first_index + index_ramp, bb_ramp, (start[index_ch], start[index_ch] + scaled[index_ch]), dur=durs[index_ramp])
+                bps[index_ch].insertSegment(first_index + index_ramp, bb_ramp, (start[index_ch], start[index_ch] + scaled[index_ch]), dur=durs[index_ramp], name=pulse_dict.get('name')+str(index_ch)+str(index_ramp)+'pulse')
+
                 start[index_ch] += scaled[index_ch]
 
             if pulse_dict.get('marker1', []):
-                bps[index_ch].marker1 = [(start_time + t, self.marker_length) for t in pulse_dict.get('marker1',[])]
+                for index, t in enumerate(pulse_dict.get('marker1',[])):
+                    bps[index_ch].setSegmentMarker(pulse_dict.get('name')+str(index_ch)+str(0)+'pulse', (t, self.marker_length), index+1)
+
             if pulse_dict.get('marker2', []):
-                bps[index_ch].marker2 = [(start_time + t, self.marker_length) for t in pulse_dict.get('marker2',[])]
+                for index, t in enumerate(pulse_dict.get('marker1',[])):
+                    bps[index_ch].setSegmentMarker(pulse_dict.get('name')+str(index_ch)+str(0)+'pulse', (t, self.marker_length), index+1)
 
         self.bp_dict[str(ch)][pulse_dict['name']] = bps[index_ch]
         end = start
@@ -192,308 +198,6 @@ class Sequencer():
         self.seq_dict[name] = seq
         return seq
 
-def calc_vec(initial, final):
-    vec = np.array(final) - np.array(initial)
-    mag = np.sqrt(np.sum(vec*vec))
-    return vec, mag
-
-
-
-def square_pulse(meas_point, empty_point, ramp_time, meas_time, gain= 1.0/6e-3, sample_rate = 1e9):
-    empty_vec, empty_mag = calc_vec(meas_point, empty_point)
-
-    sequencer = Sequencer(sample_rate, 1e-7)
-
-    # Build elements for empty, separate and measure.
-    channels = [1,2]
-
-    wait_vec = [1.0,1.0]
-    wait_ramp = 0.0
-
-    empty_vec = [empty_vec]
-    meas_vec = [wait_vec] #[meas_vec]
-
-    empty_mag = [empty_mag*gain] #v
-    meas_mag = [wait_ramp]#[meas_mag*gain] #v
-
-    empty_dur = [ramp_time]  # s
-    meas_dur = [meas_time]  # s
-
-    pulse_dict_empty = {'name': 'empty',
-                       'channels': channels,
-                       'vecs': empty_vec,
-                       'vec_amps': empty_mag,
-                       'durations': empty_dur,
-                        'type':'jump'}
-
-
-    meas_marker1 = [ramp_time]
-
-    pulse_dict_meas = {'name': 'meas',
-                      'channels': channels,
-                      'vecs': meas_vec,
-                      'vec_amps': meas_mag,
-                      'durations': meas_dur,
-                      'marker1':meas_marker1,
-                      'type':'jump'}
-    # Build sequence (empty -> separate -> measure)
-
-
-    dicts = [pulse_dict_empty, pulse_dict_meas]
-    order = ['empty', 'meas'] #'meas'
-
-    sequencer.add_pulses(dicts)
-    base_seq, area, seq_total_time = sequencer.build_seq(order, 'square')
-
-    plotter(base_seq)
-    plt.show()
-
-    return sequencer, base_seq
-
-def triangular_pulse(meas_point, empty_point, sep_point, ramp_time, meas_time, gain= 1.0/6e-3, sample_rate = 1e9):
-    empty_vec, empty_mag = calc_vec(meas_point, empty_point)
-    sep_vec, sep_mag = calc_vec(empty_point, sep_point)
-
-    sequencer = Sequencer(sample_rate, 1e-7)
-
-    # Build elements for empty, separate and measure.
-    channels = [1,2]
-
-    wait_vec = [1.0,1.0]
-    wait_ramp = 0.0
-
-    empty_vec = [empty_vec]
-    sep_vec = [sep_vec]
-    meas_vec = [wait_vec] #[meas_vec]
-
-    empty_mag = [empty_mag*gain] #v
-    sep_mag = [sep_mag*gain] #v
-    meas_mag = [wait_ramp]#[meas_mag*gain] #v
-
-    empty_dur = [ramp_time]  # s
-    sep_dur = [ramp_time]  # s
-    meas_dur = [meas_time]  # s
-
-    pulse_dict_empty = {'name': 'empty',
-                       'channels': channels,
-                       'vecs': empty_vec,
-                       'vec_amps': empty_mag,
-                       'durations': empty_dur,
-                        'type':'ramp'}
-
-    pulse_dict_sep = {'name': 'sep',
-                        'channels': channels,
-                        'vecs': sep_vec,
-                        'vec_amps': sep_mag,
-                        'durations': sep_dur,
-                        'type':'ramp'}
-
-    meas_marker1 = [ramp_time]
-
-    pulse_dict_meas = {'name': 'meas',
-                      'channels': channels,
-                      'vecs': meas_vec,
-                      'vec_amps': meas_mag,
-                      'durations': meas_dur,
-                      'marker1':meas_marker1,
-                      'type':'jump'}
-
-    # Build sequence (empty -> separate -> measure)
-
-    dicts = [pulse_dict_empty, pulse_dict_sep, pulse_dict_meas]
-    order = ['empty', 'sep', 'meas'] #'meas'
-
-    sequencer.add_pulses(dicts)
-    base_seq, area, seq_total_time = sequencer.build_seq(order, 'triangle')
-
-    plotter(base_seq)
-    plt.show()
-
-    return sequencer, base_seq
-
-def exchange_gate(meas_point, empty_point, sep_point, detunings, durations, detuning_vector, pi_half_amp, pi_half_time, gain= 1.0/6e-3, sample_rate = 1e9, fast_param='detuning'):
-    empty_vec, empty_mag = calc_vec(meas_point, empty_point)
-    sep_vec, sep_mag = calc_vec(empty_point, sep_point)
-    meas_vec, meas_mag = calc_vec(sep_point, meas_point)
-
-    pi_half_amp = pi_half_amp * gain
-    detunings = detunings * gain
-
-    ramp_time = 1e-6
-
-    sequencer = Sequencer(sample_rate, 1e-7)
-
-    # Build elements for empty, separate and measure.
-    channels = [1,2]
-
-    wait_vec = [1.0,1.0]
-    wait_ramp = 0.0
-    wait_time = 100e-9
-
-    meas_time = 2e-6
-
-    empty_vec = [empty_vec, wait_vec]
-    sep_vec = [sep_vec, wait_vec]
-    meas_vec = [meas_vec, wait_vec]
-
-    empty_mag = [empty_mag*gain, wait_ramp] #v
-    sep_mag = [sep_mag*gain, wait_ramp] #v
-    meas_mag = [meas_mag*gain, wait_ramp] #v
-
-    empty_dur = [ramp_time, wait_time]  # s
-    sep_dur = [ramp_time, wait_time]  # s
-    meas_dur = [ramp_time, meas_time]  # s
-
-    pulse_dict_empty = {'name': 'empty',
-                       'channels': channels,
-                       'vecs': empty_vec,
-                       'vec_amps': empty_mag,
-                       'durations': empty_dur,
-                        'type':'ramp'}
-
-    pulse_dict_sep = {'name': 'sep',
-                        'channels': channels,
-                        'vecs': sep_vec,
-                        'vec_amps': sep_mag,
-                        'durations': sep_dur,
-                        'type':'ramp'}
-
-    meas_marker1 = [ramp_time]
-
-    pulse_dict_meas = {'name': 'meas',
-                      'channels': channels,
-                      'vecs': meas_vec,
-                      'vec_amps': meas_mag,
-                      'durations': meas_dur,
-                      'marker1':meas_marker1,
-                      'type':'ramp'}
-    # Build sequence (empty -> separate -> measure)
-
-    pulse_dict_pi_half = {'name': 'pi_half',
-                      'channels': channels,
-                      'vecs': [detuning_vector],
-                      'vec_amps': [pi_half_amp],
-                      'durations': [pi_half_time],
-                      'type':'jump'}
-
-    pulse_dict_exchange = {'name': 'exchange',
-                        'channels': channels,
-                        'vecs': [wait_vec],
-                        'vec_amps': [wait_ramp],
-                        'durations': [ramp_time],
-                        'type':'vary_ramp',
-                        'vary_name':['exchange1ch', 'exchange2ch']}
-
-    pulse_dict_dc_offset = {'name': 'offset',
-                        'channels': channels,
-                        'vecs': [wait_vec],
-                        'vec_amps': [wait_ramp],
-                        'durations': [ramp_time],
-                        'type':'vary_ramp',
-                        'vary_name':['offset1ch', 'offset2ch']}
-
-    dicts = [pulse_dict_empty, pulse_dict_sep, pulse_dict_meas, pulse_dict_pi_half, pulse_dict_exchange, pulse_dict_dc_offset]
-    order = ['empty', 'sep', 'pi_half', 'exchange', 'pi_half', 'meas', 'offset']
-
-    print(order)
-    print(dicts)
-    sequencer.add_pulses(dicts)
-
-    base_seq, area, seq_total_time = sequencer.build_seq(order,'exchange')
-
-    plotter(base_seq)
-    plt.show()
-
-    # now vary this sequence
-    poss = []
-    channels_iters = []
-    names = []
-    args = []
-
-    #for exchange pulse
-    for index_ch, ch in enumerate(channels):
-        poss.extend([1]*3)
-        channels_iters.extend([ch]*3)
-        names.extend(['exchange'+str(ch)+'ch']*3)
-        args.extend(['start', 'stop', 'duration'])
-
-    #for DC offset pulse
-    for index_ch, ch in enumerate(channels):
-        poss.extend([1]*3)
-        channels_iters.extend([ch]*3)
-        names.extend(['offset'+str(ch)+'ch']*3)
-        args.extend(['start', 'stop','duration'])
-
-
-    scaled_detunings = np.array([sequencer._scale_from_vec(detuning_vector, i).tolist() for i in detunings]).T.tolist()
-
-    offset_time = 0.33 * seq_total_time
-    offset_mag = -area*offset_time
-
-    if fast_param == 'detuning':
-        iters = []
-
-        #for exchange pulse
-        for index_ch, ch in enumerate(channels):
-            start_ch = []
-            stop_ch = []
-            duration_ch = []
-            for t in durations:
-                start_ch.extend(scaled_detunings[index_ch])
-                stop_ch.extend(scaled_detunings[index_ch])
-                duration_ch.extend([t]*len(scaled_detunings[index_ch]))
-            iters.append(start_ch)
-            iters.append(stop_ch)
-            iters.append(duration_ch)
-
-        #for dc offset
-        for index_ch, ch in enumerate(channels):
-            start_ch = []
-            stop_ch = []
-            duration_ch = []
-            for t in durations:
-                offset = (offset_mag[index_ch] + (np.array(scaled_detunings[index_ch]) * t / offset_time)).tolist()
-                start_ch.extend(offset)
-                stop_ch.extend(offset)
-                duration_ch.extend([offset_time]*len(scaled_detunings[index_ch]))
-            iters.append(start_ch)
-            iters.append(stop_ch)
-            iters.append(duration_ch)
-
-
-    elif fast_param == 'time':
-        iters = []
-        #for exchange pulse
-        for index_ch, ch in enumerate(channels):
-            start_ch = []
-            stop_ch = []
-            duration_ch = []
-            for d in scaled_detunings[index_ch]:
-                start_ch.extend([d]*len(durations))
-                stop_ch.extend([d]*len(durations))
-                duration_ch.extend(durations.tolist())
-            iters.append(start_ch)
-            iters.append(stop_ch)
-            iters.append(duration_ch)
-
-        #for dc offset
-        for index_ch, ch in enumerate(channels):
-            start_ch = []
-            stop_ch = []
-            duration_ch = []
-            for d in scaled_detunings[index_ch]:
-                offset = offset_mag[index_ch] + (d*durations/offset_time)
-                start_ch.extend(offset)
-                stop_ch.extend(offset)
-                duration_ch.extend([offset_time]*len(durations))
-            iters.append(start_ch)
-            iters.append(stop_ch)
-            iters.append(duration_ch)
-
-    newseq = bb.repeatAndVarySequence(base_seq, poss, channels_iters, names, args, iters)
-    #plotter(newseq)
-    #plt.show()
-    return sequencer, newseq
 
 class DesignExperiment(Sequencer):
     def __init__(self, gain=1.0/6e-3, sample_rate=1e9, marker_rate=1e-7):
@@ -518,17 +222,51 @@ class DesignExperiment(Sequencer):
         self.vary_name = []
 
         '''
-        dict = {
-        'channels':[1,2],
-        'order':{
-            'empty':{
-                'loc':[0,1],
-                'method':'ramp',
-                'time':
-                'wait_time':10,
-                'kwargs':{'vary_name'}}}
-        'kwargs':{
-        }
+        --------------------------
+        Exchange pulse  dictionary
+        --------------------------
+        {
+        "channels":[1,2],
+        "dc_correction": true,
+          "origin":[3.535, 2.655],
+          "order":{
+              "unload":{
+                "loc":[3.545, 2.65],
+                "method":"ramp",
+                "time":1e-6,
+                "wait":1e-6
+              },
+              "load":{
+                "loc":[3.53, 2.65],
+                "method":"ramp",
+                "time":1e-6,
+                "wait":1e-6
+              },
+              "pi_half_1":{
+                "loc":[3.535, 2.655],
+                "method":"jump",
+                "time":16e-9
+              },
+                "exchange":{
+                "method":"vary_ramp",
+                "kwargs":{"vary_name": "exchange"}
+              },
+                "pi_half_2":{
+                "loc":[3.535, 2.655],
+                "method":"jump",
+                "time":16e-9
+              },
+              "measure":{
+                    "loc":[3.535, 2.655],
+                    "method":"ramp",
+                    "time":1e-6,
+                    "wait":10e-6,
+                    "marker1": [1e-6]
+                  }
+            },
+                "kwargs":{
+                }
+          }
         '''
 
         pulse_dicts = []
@@ -755,27 +493,10 @@ class DesignExperiment(Sequencer):
 
 
 if __name__ == '__main__':
-    detunings = np.linspace(0,12.0e-3,1)
-    durations = np.linspace(1000.0e-9,10000e-9,4)
-    detuning_vector = [1.0,1.0]
-    meas_point = [3.535, 2.655]
-    empty_point = [3.545, 2.65]
-    sep_point = [3.53, 2.65]
-    pi_half_amp = 30e-3
-    pi_half_time = 1e-6
-    sequencer, seq = exchange_gate(meas_point, empty_point, sep_point, detunings, durations, detuning_vector, pi_half_amp, pi_half_time, fast_param='detuning')
-    plotter(seq)
-    plt.show()
+
     '''seq.setChannelAmplitude(1, 4.5)  # Call signature: channel, amplitude (peak-to-peak)
     seq.setChannelOffset(1, 0)
     seq.setChannelAmplitude(2, 4.5)  # Call signature: channel, amplitude (peak-to-peak)
     seq.setChannelOffset(2, 0)
     package = seq.outputForAWGFile()'''
 
-    meas_point = [0,0]
-    empty_point = [20e-3, -8e-3]
-    sep_point = [12e-3, -20e-3]
-    ramp_time = 1e-6
-    meas_time = 8e-6
-
-    sequencer, tseq = triangular_pulse(meas_point, empty_point, sep_point, ramp_time,meas_time, gain=1.0)

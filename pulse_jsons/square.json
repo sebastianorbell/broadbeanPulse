@@ -1,0 +1,19 @@
+{
+"channels":[1,2],
+"dc_correction": false,
+  "origin":[1.3486, 1.12234],
+  "order":{
+      "sep":{
+        "loc":[1.3268, 1.11333],
+        "method":"ramp",
+        "time":1e-6
+      },
+      "measure":{
+            "loc":[1.3486, 1.12234],
+            "method":"ramp",
+            "time":1e-6
+          }
+    },
+        "kwargs":{
+        }
+  }

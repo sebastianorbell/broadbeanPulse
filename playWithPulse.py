@@ -1,12 +1,12 @@
 import broadbean as bb
-plotter = bb.plotter
+from broadbean.plotting import plotter
 import numpy as np
 import matplotlib.pyplot as plt
 import json
 
-from broadbeanPulse.pulseClass import  DesignExperiment
+from pulseClass import DesignExperiment
 
-file = 'pulse_jsons/exchange.json'
+file = 'pulse_jsons/square.json'
 
 with open(file, 'r') as read_file:
     master = json.load(read_file)
@@ -24,7 +24,13 @@ detuning_vector = [1.0, 1.0]
 sequence = experiment.add_dc_correction()
 '''
 
-sequence = experiment.vary_base_sequence('exchange',detuning_vector, detunings, durations, fast_param='time')
-
-plotter(sequence)
+'''sequence = experiment.vary_base_sequence('exchange',detuning_vector, detunings, durations, fast_param='time')
+'''
+plotter(base)
 plt.show()
+
+'''sequence.setChannelAmplitude(1, 4.5)  # Call signature: channel, amplitude (peak-to-peak)
+sequence.setChannelOffset(1, 0)
+sequence.setChannelAmplitude(2, 4.5)  # Call signature: channel, amplitude (peak-to-peak)
+sequence.setChannelOffset(2, 0)
+package = seq.outputForAWGFile()'''
