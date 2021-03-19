@@ -1,0 +1,42 @@
+{
+"channels":[1,2],
+"dc_correction": true,
+  "origin":[3.535, 2.655],
+  "order":{
+      "unload":{
+        "loc":[3.545, 2.65],
+        "method":"ramp",
+        "time":1e-6,
+        "wait":1e-6
+      },
+      "load":{
+        "loc":[3.53, 2.65],
+        "method":"ramp",
+        "time":1e-6,
+        "wait":1e-6
+      },
+      "pi_half_1":{
+        "loc":[3.535, 2.655],
+        "method":"jump",
+        "time":16e-9
+      },
+        "exchange":{
+        "method":"vary_ramp",
+        "marker1": [1016e-9],
+        "kwargs":{"vary_name": "exchange"}
+      },
+        "pi_half_2":{
+        "loc":[3.535, 2.655],
+        "method":"jump",
+        "time":16e-9
+      },
+      "measure":{
+            "loc":[3.535, 2.655],
+            "method":"ramp",
+            "time":1e-6,
+            "wait":10e-6
+          }
+    },
+        "kwargs":{
+        }
+  }
