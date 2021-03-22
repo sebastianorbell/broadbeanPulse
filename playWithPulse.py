@@ -19,7 +19,7 @@ plt.show()
 detunings = np.linspace(0, 30.0e-3, 5)
 durations = np.linspace(10.0e-9, 200e-9, 1)
 detuning_vector = [1.0, 1.0]
-lever_arms = [1,1]
+lever_arms = [0.454,0.854] # meV/V for LB (ch 2 - dac 11), RB (ch 1 - dac 7)
 
 '''
 sequence = experiment.add_dc_correction()
