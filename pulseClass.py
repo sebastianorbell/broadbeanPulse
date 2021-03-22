@@ -394,9 +394,12 @@ class DesignExperiment(Sequencer):
         # plt.show()
         return newseq
 
-    def vary_base_sequence(self, vary_name, detuning_vector, detunings, durations, fast_param='detuning'):
+    def vary_base_sequence(self, vary_name, detuning_vector, detunings, durations, lever_arms, fast_param='detuning'):
         '''fast_param = detuning or time'''
         variables = ['start', 'stop', 'duration']
+
+        if len(lever_arms)!= len(self.channels):
+            print('Lever arms must be the same length as channels')
 
         poss = []
         channels_iters = []
@@ -421,8 +424,8 @@ class DesignExperiment(Sequencer):
 
         print(names)
 
-        scaled_detunings = np.array(
-            [self.sequencer._scale_from_vec(detuning_vector, i).tolist() for i in detunings]).T.tolist()
+        scaled_detunings = (np.array(
+            [self.sequencer._scale_from_vec(detuning_vector, i).tolist() for i in detunings])*np.array(lever_arms)).T.tolist()
 
         offset_time = 0.33 * self.seq_total_time
         offset_mag = -self.area / offset_time
