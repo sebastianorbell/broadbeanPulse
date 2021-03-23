@@ -7,7 +7,7 @@ import json
 
 from pulseClass import DesignExperiment
 
-file = 'pulse_jsons/rabi.json'
+file = 'pulse_jsons/exchange.json'
 
 with open(file, 'r') as read_file:
     master = json.load(read_file)
@@ -26,7 +26,7 @@ lever_arms = [0.454,0.854] # meV/V for LB (ch 2 - dac 11), RB (ch 1 - dac 7)
 sequence = experiment.add_dc_correction()
 '''
 
-sequence = experiment.vary_base_sequence('rabi',detuning_vector, detunings, durations, lever_arms, fast_param='time')
+sequence = experiment.vary_base_sequence('exchange',detuning_vector, detunings, durations, lever_arms, fast_param='time')
 
 plotter(sequence)
 plt.show()
