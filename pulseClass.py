@@ -1,5 +1,5 @@
 import broadbean as bb
-from broadbean.plotting import plotter
+#from broadbean.plotting import plotter
 #plotter = bb.plotter
 import numpy as np
 import matplotlib.pyplot as plt
@@ -425,7 +425,7 @@ class DesignExperiment(Sequencer):
         print(names)
 
         scaled_detunings = (np.array(
-            [self.sequencer._scale_from_vec(detuning_vector, i).tolist() for i in detunings])*np.array(lever_arms)).T.tolist()
+            [self.sequencer._scale_from_vec(detuning_vector, i).tolist() for i in detunings])/np.array(lever_arms)).T.tolist()
 
         offset_time = 0.33 * self.seq_total_time
         offset_mag = -self.area / offset_time
