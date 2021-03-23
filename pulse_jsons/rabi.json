@@ -1,0 +1,32 @@
+{
+"channels":[1,2],
+"dc_correction": true,
+  "origin":[3.535, 2.655],
+  "order":{
+      "unload":{
+        "loc":[3.545, 2.65],
+        "method":"ramp",
+        "time":1e-6,
+        "wait":1e-6
+      },
+      "load":{
+        "loc":[3.53, 2.65],
+        "method":"ramp",
+        "time":1e-6,
+        "wait":1e-6
+      },
+        "exchange":{
+        "method":"vary_ramp",
+        "kwargs":{"vary_name": "rabi"}
+      },
+      "measure":{
+            "loc":[3.535, 2.655],
+            "method":"ramp",
+            "time":1e-6,
+            "wait":10e-6,
+            "marker1": [1e-6]
+          }
+    },
+        "kwargs":{
+        }
+  }

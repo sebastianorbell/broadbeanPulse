@@ -1,6 +1,6 @@
 import broadbean as bb
-from broadbean.plotting import plotter
-#plotter = bb.plotter
+#from broadbean.plotting import plotter
+plotter = bb.plotter
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib as mpl

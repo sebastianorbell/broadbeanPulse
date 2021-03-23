@@ -3,6 +3,8 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/broadbeanPulse.iml" filepath="$PROJECT_DIR$/.idea/broadbeanPulse.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../../qgor/.idea/qgor.iml" filepath="$PROJECT_DIR$/../../qgor/.idea/qgor.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../../qgor_pulse/.idea/qgor_pulse.iml" filepath="$PROJECT_DIR$/../../qgor_pulse/.idea/qgor_pulse.iml" />
     </modules>
   </component>
 </project>
