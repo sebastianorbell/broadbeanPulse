@@ -69,4 +69,10 @@ mainseq.setSequencingNumberOfRepetitions(1, 25)
 mainseq.setSequencingNumberOfRepetitions(2, 25)
 mainseq.setSequencingNumberOfRepetitions(3, 25)
 
+mainseq.setChannelAmplitude(1, 5)  # Call signature: channel, amplitude (peak-to-peak)
+mainseq.setChannelOffset(1, 0)
+mainseq.setChannelAmplitude(2, 5)  # Call signature: channel, amplitude (peak-to-peak)
+mainseq.setChannelOffset(2, 0)
+package = mainseq.outputForAWGFile()
+
 plotter(mainseq)

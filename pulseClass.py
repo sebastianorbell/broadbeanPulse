@@ -234,10 +234,12 @@ class Sequencer():
 
 
 class DesignExperiment(Sequencer):
-    def __init__(self, gain=1.0 / 6e-3, sample_rate=1e9, marker_rate=1e-7, compression=100):
+    def __init__(self, gain=1.0 / 6e-3, sample_rate=1e9, marker_length=1e-7, compression=100):
         super().__init__()
         self.gain = gain
-        self.sequencer = Sequencer(sample_rate, marker_rate)
+        self.marker_length = marker_length
+        self.sequencer = Sequencer(sample_rate=sample_rate, marker_length=marker_length, compression=compression)
+        self.sample_rate = sample_rate
         self.wait_vec = [1.0, 1.0]
         self.wait_ramp = 0.0
         self.wait_time = 1e-6

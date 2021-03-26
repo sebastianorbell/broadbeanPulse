@@ -15,7 +15,7 @@
         "time":1e-6,
         "wait":1e-6
       },
-        "exchange":{
+        "rabi":{
         "method":"vary_ramp",
         "kwargs":{"vary_name": "rabi"}
       },
