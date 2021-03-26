@@ -34,7 +34,7 @@
             "method":"ramp",
             "time":1e-6,
             "wait":10e-6,
-            "marker1": [1e-6]
+            "marker1": [0.9e-6]
           }
     },
         "kwargs":{

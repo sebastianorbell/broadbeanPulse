@@ -1,6 +1,9 @@
 import broadbean as bb
-#from broadbean.plotting import plotter
-plotter = bb.plotter
+try:
+    from broadbean.plotting import plotter
+except:
+    plotter = bb.plotter
+
 import numpy as np
 import matplotlib.pyplot as plt
 import json
@@ -26,10 +29,10 @@ lever_arms = [0.454,0.854] # meV/V for LB (ch 2 - dac 11), RB (ch 1 - dac 7)
 sequence = experiment.add_dc_correction()
 '''
 
-sequence = experiment.vary_base_sequence('exchange',detuning_vector, detunings, durations, lever_arms, fast_param='time')
+sequence = experiment.subSequencer('exchange',detuning_vector, detunings, durations, lever_arms, fast_param='time')
 
-plotter(sequence)
-plt.show()
+'''plotter(sequence)
+plt.show()'''
 
 '''sequence.setChannelAmplitude(1, 4.5)  # Call signature: channel, amplitude (peak-to-peak)
 sequence.setChannelOffset(1, 0)
