@@ -67,11 +67,12 @@ w_measureL = rect(MeasureTime,0*GainL*0.2)
 #100 us pulse, 1 us in empty, 1 us in load and almost all the time in measure
 #make it zero average
 w_pulseR = w_minus_PihalfPulseR + w_minus_PihalfPulseR + w_emptyR + w_initR + w_PihalfPulseR + w_loadR + w_PihalfPulseR #+ w_measureR
-w_pulseL = w_minus_PihalfPulseL + w_minus_PihalfPulseL + w_initL + w_emptyL + w_PihalfPulseL + w_loadL + w_PihalfPulseL #+ w_measureL
+w_pulseL = w_minus_PihalfPulseL + w_minus_PihalfPulseL + w_initL + w_emptyL + w_PihalfPulseL + w_loadL + w_PihalfPulseL + w_measureL
 plotter(w_pulseL)
 plt.show()
 plotter(w_pulseR)
 plt.show()
+'''
 #We want to step the detuning from 0 to 12 mV in as many steps as possible
 #the amount of steps depends on the max number of samples the sequencer can store
 for i in range(200):
@@ -84,7 +85,7 @@ for i in range(200):
   w_initR = -LoadAmp*GainR*rect(Ltime,0.2) 
   w_pulseR = w_pulseR  + w_minus_PihalfPulseR + w_minus_PihalfPulseR + w_initR + w_emptyR + w_PihalfPulseR+ w_loadR  + w_PihalfPulseR +w_measureR
   w_pulseL = w_pulseL +  w_minus_PihalfPulseL + w_minus_PihalfPulseL + w_initL + w_emptyL +  w_PihalfPulseL + w_loadL +  w_PihalfPulseL + w_measureL
-
+'''
 #wave w_marker = join(w_markerleft, w_markerMiddle, w_markerRight) var time
 '''cvar i 
 var j 

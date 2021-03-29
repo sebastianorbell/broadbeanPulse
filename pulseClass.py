@@ -49,6 +49,8 @@ class Sequencer():
                 update = self.build_ramp_pulse_bp(self.pulse_dict[pulse])
             elif self.pulse_dict[pulse].get('type') == 'vary_ramp':
                 update = self.build_named_ramp_pulse_bp(self.pulse_dict[pulse])
+            elif self.pulse_dict[pulse].get('type') == 'jump_and_back':
+                update = self.build_jump_and_back_pulse_bp(self.pulse_dict[pulse])
             elif self.pulse_dict[pulse].get('type') == 'jump':
                 update = self.build_jump_pulse_bp(self.pulse_dict[pulse])
             area += self.area_dict[pulse]
@@ -141,6 +143,49 @@ class Sequencer():
         return update_for_next
 
     def build_jump_pulse_bp(self, pulse_dict):
+        sample_rate = pulse_dict.get('sample_rate', self.sample_rate)
+
+        ramp_ranges = pulse_dict['vec_amps']
+        vecs = pulse_dict['vecs']
+        durs = pulse_dict['durations']
+        first_index = pulse_dict.get('first_index',0)
+        channels = pulse_dict['channels']
+        bps = pulse_dict.get('bps',[bb.BluePrint() for _ in channels])
+        start = np.array(pulse_dict.get('start',[0 for _ in channels])).astype(float)
+        start_time = pulse_dict.get('start_time',0.0)
+        area = np.zeros([2])
+        for index_ch, ch in enumerate(channels):
+            bps[index_ch].setSR(sample_rate)
+            for index_ramp, ramp_range in enumerate(ramp_ranges):
+                scaled = self._scale_from_vec(vecs[index_ramp], ramp_range)
+
+                #area[index_ch] += 0.5*(start[index_ch] * 2 + scaled[index_ch]) * durs[index_ramp]
+
+                area[index_ch] += (scaled[index_ch]) * durs[index_ramp]
+
+                bps[index_ch].insertSegment(first_index + index_ramp, bb_ramp, (scaled[index_ch], scaled[index_ch]),
+                                            dur=durs[index_ramp], name=pulse_dict.get('name')+str(index_ch)+str(index_ramp)+'pulse')
+                start[index_ch] += scaled[index_ch]
+
+            if pulse_dict.get('marker1', []):
+                for index, t in enumerate(pulse_dict.get('marker1',[])):
+                    bps[index_ch].setSegmentMarker(pulse_dict.get('name')+str(index_ch)+str(0)+'pulse', (t, self.marker_length), index+1)
+
+            if pulse_dict.get('marker2', []):
+                for index, t in enumerate(pulse_dict.get('marker1',[])):
+                    bps[index_ch].setSegmentMarker(pulse_dict.get('name')+str(index_ch)+str(0)+'pulse', (t, self.marker_length), index+1)
+
+        self.bp_dict[str(ch)][pulse_dict['name']] = bps[index_ch]
+        end = start
+        final_index = first_index + len(ramp_ranges)
+        final_time = np.sum(durs) + start_time
+        update_for_next = {'bps':bps, 'start':end, 'first_index':final_index, 'start_time':final_time}
+
+        self.area_dict[pulse_dict.get('name')] = area
+
+        return update_for_next
+
+    def build_jump_and_back_pulse_bp(self, pulse_dict):
         sample_rate = pulse_dict.get('sample_rate', self.sample_rate)
 
         ramp_ranges = pulse_dict['vec_amps']
@@ -299,6 +344,23 @@ class DesignExperiment(Sequencer):
                          'durations': durations,
                          'type': self.order_dict[key].get('method')}
 
+            if self.order_dict[key].get('method') == 'jump':
+                order.append(key)
+                current = self.order_dict[key].get('loc')
+                vec, mag = self._calc_vec(new_origin, current)
+                new_origin = current
+
+                vectors = [vec]
+                magnitudes = [mag * self.gain]
+                durations = [self.order_dict[key].get('time')]
+
+                pulse = {'name': key,
+                         'channels': self.channels,
+                         'vecs': vectors,
+                         'vec_amps': magnitudes,
+                         'durations': durations,
+                         'type': self.order_dict[key].get('method')}
+
             elif self.order_dict[key].get('method') == 'vary_ramp':
                 order.append(key)
                 self.vary_name.append(kwargs['vary_name'])
@@ -314,14 +376,20 @@ class DesignExperiment(Sequencer):
                          'type': self.order_dict[key].get('method'),
                          'vary_name':[kwargs['vary_name']+'{}ch'.format(i) for i in self.channels]}
 
-            elif self.order_dict[key].get('method') == 'jump':
+            elif self.order_dict[key].get('method') == 'jump_and_back':
                 order.append(key)
                 current = self.order_dict[key].get('loc')
                 vec, mag = self._calc_vec(new_origin, current)
 
-                vectors = [vec]
-                magnitudes = [mag * self.gain]
-                durations = [self.order_dict[key].get('time')]
+                if isinstance(self.order_dict[key].get('wait',None),(float,int)):
+                    vectors = [vec, self.wait_vec]
+                    magnitudes = [mag * self.gain, self.wait_ramp]
+                    durations = [self.order_dict[key].get('time'),self.order_dict[key].get('wait')]
+
+                else:
+                    vectors = [vec]
+                    magnitudes = [mag * self.gain]
+                    durations = [self.order_dict[key].get('time')]
 
                 pulse = {'name': key,
                          'channels': self.channels,

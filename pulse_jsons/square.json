@@ -5,14 +5,16 @@
   "order":{
       "sep":{
         "loc":[1.3268, 1.11333],
-        "method":"ramp",
-        "time":1e-6
+        "method":"jump_and_back",
+        "time":60e-9,
+        "wait": 2e-6
       },
-      "measure":{
-            "loc":[1.3486, 1.12234],
-            "method":"ramp",
-            "time":1e-6
-          }
+    "sep2":{
+        "loc":[1.3268, 1.11333],
+        "method":"jump_and_back",
+        "time":60e-9,
+        "wait": 2e-6
+      }
     },
         "kwargs":{
         }
