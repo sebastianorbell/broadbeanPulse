@@ -1,16 +1,16 @@
 {
 "channels":[1,2],
 "dc_correction": false,
-  "origin":[1.3486, 1.12234],
+  "origin":[1.32408, 1.20388],
   "order":{
       "sep":{
-        "loc":[1.3268, 1.11333],
+        "loc":[1.314247, 1.221538],
         "method":"jump_and_back",
         "time":60e-9,
         "wait": 2e-6
       },
     "sep2":{
-        "loc":[1.3268, 1.11333],
+        "loc":[1.333913, 1.186222],
         "method":"jump_and_back",
         "time":60e-9,
         "wait": 2e-6

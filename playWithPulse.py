@@ -10,12 +10,12 @@ import json
 
 from pulseClass import DesignExperiment
 
-file = 'pulse_jsons/rabi.json'
+file = 'pulse_jsons/square.json'
 
 with open(file, 'r') as read_file:
     master = json.load(read_file)
 
-experiment = DesignExperiment(gain=1.0)
+experiment = DesignExperiment(gain=103.5, sample_rate=1200000000.0)
 base = experiment.build_base_from_json(master)
 plotter(base)
 plt.show()
