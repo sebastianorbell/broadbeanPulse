@@ -10,7 +10,7 @@ import json
 
 from pulseClass import DesignExperiment
 
-file = 'pulse_jsons/square.json'
+file = 'pulse_jsons/rabi.json'
 
 with open(file, 'r') as read_file:
     master = json.load(read_file)
