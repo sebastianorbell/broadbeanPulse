@@ -118,8 +118,8 @@ seq.checkConsistency()
 plotter(seq)
 plt.show()
 
-detunings = np.array([2.3])  # np.linspace(1.0, 2.5, 60)
-durations = np.linspace(10e-9, 500e-9, 5)
+detunings = np.linspace(1.0, 2.5, 3)
+durations = np.linspace(10e-9, 500e-9, 3)
 new_seq = rabi.vary_base_sequence(seq, 'vary', primaryVector, detunings, durations)
 
 length = np.size(durations)*np.size(detunings)
