@@ -123,10 +123,10 @@ durations = np.linspace(10e-9, 500e-9, 3)
 new_seq = rabi.vary_base_sequence(seq, 'vary', primaryVector, detunings, durations)
 
 length = np.size(durations)*np.size(detunings)
-new_seq.addElement(length, measElem)
-new_seq.addElement(length+1, unloadElem)
+new_seq.addElement(length+1, measElem)
+new_seq.addElement(length+2, unloadElem)
 
-order = [length, 'index', length+1]
+order = [length+1, 'index', length+2]
 seqParam = SequenceParamterClass('Seq', new_seq, order)
 
 for i in range(length):
