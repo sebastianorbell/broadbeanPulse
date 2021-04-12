@@ -3,7 +3,8 @@ Created on 08/04/2021
 @author sebastian
 """
 import broadbean as bb
-from constructSequence import Sequencer
+from constructSequence import Sequencer, SequenceParamterClass, PulseBuilder
+
 
 try:
     from broadbean.plotting import plotter
@@ -13,13 +14,9 @@ except:
 import numpy as np
 import matplotlib.pyplot as plt
 
-class PulseBuilder():
-    def __init__(self, sequencer, origin, chs):
-        self.sequencer = sequencer
-        self.origin = origin
-        self.chs = chs
 
 class RabiPulse(PulseBuilder):
+    '''Defined for unique experiment'''
     def __init__(self, chs, sequencer, origin, primaryVector):
         super().__init__(
         sequencer, origin, chs
@@ -27,7 +24,7 @@ class RabiPulse(PulseBuilder):
         self.primaryVector = primaryVector
 
     def measureElem(self, duration):
-        elem, stop = sequencer.buildVectorElement(sequencer.buildSegmentJump, self.origin, duration, 0, self.chs, self.primaryVector)
+        elem, stop = sequencer.buildVectorElement(sequencer.buildSegmentJump, self.origin, duration, 0, self.chs, self.primaryVector, marker1=[0.0])
         return elem, stop
 
     def unloadElem(self, duration, amp):
@@ -86,7 +83,6 @@ class RabiPulse(PulseBuilder):
 
         return newseq
 
-
 bb_ramp = bb.PulseAtoms.ramp
 
 sequencer = Sequencer()
@@ -126,7 +122,14 @@ detunings = np.array([2.3])  # np.linspace(1.0, 2.5, 60)
 durations = np.linspace(10e-9, 500e-9, 5)
 new_seq = rabi.vary_base_sequence(seq, 'vary', primaryVector, detunings, durations)
 
-new_seq.addElement(6, measElem)
-new_seq.addElement(7, unloadElem)
-plotter(new_seq)
-plt.show()
+length = np.size(durations)*np.size(detunings)
+new_seq.addElement(length, measElem)
+new_seq.addElement(length+1, unloadElem)
+
+order = [length, 'index', length+1]
+seqParam = SequenceParamterClass('Seq', new_seq, order)
+
+for i in range(length):
+    seqParam.set_raw(i+1)
+    plotter(new_seq)
+    plt.show()

@@ -4,6 +4,7 @@ Created on 31/03/2021
 """
 
 import broadbean as bb
+from qcodes.instrument.parameter import Parameter
 
 try:
     from broadbean.plotting import plotter
@@ -14,6 +15,12 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 bb_ramp = bb.PulseAtoms.ramp
+
+class PulseBuilder():
+    def __init__(self, sequencer, origin, chs):
+        self.sequencer = sequencer
+        self.origin = origin
+        self.chs = chs
 
 
 class Sequencer():
@@ -38,10 +45,10 @@ class Sequencer():
     def _addMarkers(self, bp, **kwargs):
 
         if isinstance(kwargs.get('marker1', None), list):
-            bp.marker1 = [(t, self.marker_length) for t in kwargs.get('marker1')]
+            bp.marker1 = [(t, self.markerLength) for t in kwargs.get('marker1')]
 
         if isinstance(kwargs.get('marker2', None), list):
-            bp.marker2 = [(t, self.marker_length) for t in kwargs.get('marker2')]
+            bp.marker2 = [(t, self.markerLength) for t in kwargs.get('marker2')]
 
         return bp
 
@@ -101,4 +108,25 @@ class Sequencer():
         elem = self.buildElement(bps, chs)
 
         return elem, stops
+
+class SequenceParamterClass(Parameter):
+    def __init__(self, name, sequence, order):
+        super().__init__(name, label='Qcodes parameter class to iterate through sequence elements.',
+                         docstring='Qcodes parameter class to iterate through sequence elements.')
+        self.sequence = sequence
+        self.order = order
+
+    def set_raw(self, goTo):
+        for index, item in enumerate(self.order):
+            first, second = self.order[index-1], self.order[index]
+
+            if first == 'index':
+                first = goTo
+
+            elif second == 'index':
+                second = goTo
+
+            self.sequence.setSequencingGoto(first, second)
+
+        return
 
