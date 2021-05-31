@@ -3,8 +3,8 @@ Created on 08/04/2021
 @author sebastian
 """
 import broadbean as bb
-from constructSequence import Sequencer, SequenceParamterClass, PulseBuilder
-
+from constructSequence import Sequencer, PulseBuilder
+from qcodes.instrument.parameter import Parameter
 
 try:
     from broadbean.plotting import plotter
@@ -14,6 +14,26 @@ except:
 import numpy as np
 import matplotlib.pyplot as plt
 
+class SequenceParamterClass(Parameter):
+    def __init__(self, name, sequence, order):
+        super().__init__(name, label='Qcodes parameter class to iterate through sequence elements.',
+                         docstring='Qcodes parameter class to iterate through sequence elements.')
+        self.sequence = sequence
+        self.order = order
+
+    def set_raw(self, goTo):
+        for index, item in enumerate(self.order):
+            first, second = self.order[index-1], self.order[index]
+
+            if first == 'index':
+                first = goTo
+
+            elif second == 'index':
+                second = goTo
+
+            self.sequence.setSequencingGoto(first, second)
+
+        return
 
 class RabiPulse(PulseBuilder):
     '''Defined for unique experiment'''
@@ -107,29 +127,28 @@ varyElem, _ = rabi.varyElem(20e-6)
 
 seq = bb.Sequence()
 
-#seq.addElement(1, unloadElem)
-#seq.addElement(2, measElem)
-seq.addElement(1, varyElem)
-
+seq.addElement(1, unloadElem)
+seq.addElement(2, varyElem)
+seq.addElement(3, measElem)
 
 seq.setSR(rabi.sequencer.sampleRate)
 seq.checkConsistency()
 
 plotter(seq)
 plt.show()
-
-detunings = np.linspace(1.0, 2.5, 3)
-durations = np.linspace(10e-9, 500e-9, 3)
-new_seq = rabi.vary_base_sequence(seq, 'vary', primaryVector, detunings, durations)
-
-length = np.size(durations)*np.size(detunings)
-new_seq.addElement(length+1, measElem)
-new_seq.addElement(length+2, unloadElem)
-
-order = [length+1, 'index', length+2]
-seqParam = SequenceParamterClass('Seq', new_seq, order)
-
-for i in range(length):
-    seqParam.set_raw(i+1)
-    plotter(new_seq)
-    plt.show()
+#
+# detunings = np.linspace(1.0, 2.5, 3)
+# durations = np.linspace(10e-9, 500e-9, 3)
+# new_seq = rabi.vary_base_sequence(seq, 'vary', primaryVector, detunings, durations)
+#
+# length = np.size(durations)*np.size(detunings)
+# new_seq.addElement(length+1, measElem)
+# new_seq.addElement(length+2, unloadElem)
+#
+# order = [length+1, 'index', length+2]
+# seqParam = SequenceParamterClass('Seq', new_seq, order)
+#
+# for i in range(length):
+#     seqParam.set_raw(i+1)
+#     plotter(new_seq)
+#     plt.show()

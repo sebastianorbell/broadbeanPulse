@@ -5,6 +5,7 @@
       <module fileurl="file://$PROJECT_DIR$/.idea/broadbeanPulse.iml" filepath="$PROJECT_DIR$/.idea/broadbeanPulse.iml" />
       <module fileurl="file://$PROJECT_DIR$/../../qgor/.idea/qgor.iml" filepath="$PROJECT_DIR$/../../qgor/.idea/qgor.iml" />
       <module fileurl="file://$PROJECT_DIR$/../../qgor_pulse/.idea/qgor_pulse.iml" filepath="$PROJECT_DIR$/../../qgor_pulse/.idea/qgor_pulse.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../../stochastic_activation/.idea/stochastic_activation.iml" filepath="$PROJECT_DIR$/../../stochastic_activation/.idea/stochastic_activation.iml" />
     </modules>
   </component>
 </project>

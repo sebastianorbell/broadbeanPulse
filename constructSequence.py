@@ -4,7 +4,6 @@ Created on 31/03/2021
 """
 
 import broadbean as bb
-from qcodes.instrument.parameter import Parameter
 
 try:
     from broadbean.plotting import plotter
@@ -109,24 +108,5 @@ class Sequencer():
 
         return elem, stops
 
-class SequenceParamterClass(Parameter):
-    def __init__(self, name, sequence, order):
-        super().__init__(name, label='Qcodes parameter class to iterate through sequence elements.',
-                         docstring='Qcodes parameter class to iterate through sequence elements.')
-        self.sequence = sequence
-        self.order = order
 
-    def set_raw(self, goTo):
-        for index, item in enumerate(self.order):
-            first, second = self.order[index-1], self.order[index]
-
-            if first == 'index':
-                first = goTo
-
-            elif second == 'index':
-                second = goTo
-
-            self.sequence.setSequencingGoto(first, second)
-
-        return
 
