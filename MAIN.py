@@ -1,6 +1,6 @@
 from qgor import Station
 from myPulse import RabiPulse
-from broadPulse.broadSequence import Sequencer, SequenceParamterClass
+from broadPulse.broadPulse.broadSequence import Sequencer, SequenceParamterClass
 import broadbean as bb
 import matplotlib.pyplot as plt
 

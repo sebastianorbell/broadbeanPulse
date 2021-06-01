@@ -11,15 +11,15 @@ import json
 import matplotlib.pyplot as plt
 
 from broadbean import Sequence
-from broadPulse.broadSequence import Sequencer
-from broadPulse.broadExchange import ExchangePulse
+from broadPulse.broadPulse.broadSequence import Sequencer
+from broadPulse.broadPulse.broadExperiment.broadExchange.pulse import ExchangePulse
 
 try:
     from broadbean.plotting import plotter
 except:
     plotter = bb.plotter
 
-class PulseClass(Sequence):
+class ExchangeParameter(Sequence):
 
     def __init__(self, additional_options=None, options_path=Path(__file__).parent / 'pulseClass.json', **kwargs):
 

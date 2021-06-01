@@ -3,7 +3,7 @@ Created on 08/04/2021
 @author sebastian
 """
 import broadbean as bb
-from broadPulse.broadSequence import Sequencer, PulseBuilder
+from broadPulse.broadPulse.broadSequence import Sequencer, PulseBuilder
 from qcodes.instrument.parameter import Parameter
 
 try:
