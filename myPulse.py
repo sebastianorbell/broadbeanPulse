@@ -3,8 +3,8 @@ Created on 08/04/2021
 @author sebastian
 """
 import broadbean as bb
-from constructSequence import Sequencer, PulseBuilder
-from qcodes.instrument.parameter import Parameter
+from constructSequence import Sequencer, SequenceParamterClass, PulseBuilder
+from qgor import Station
 
 try:
     from broadbean.plotting import plotter
@@ -14,26 +14,6 @@ except:
 import numpy as np
 import matplotlib.pyplot as plt
 
-class SequenceParamterClass(Parameter):
-    def __init__(self, name, sequence, order):
-        super().__init__(name, label='Qcodes parameter class to iterate through sequence elements.',
-                         docstring='Qcodes parameter class to iterate through sequence elements.')
-        self.sequence = sequence
-        self.order = order
-
-    def set_raw(self, goTo):
-        for index, item in enumerate(self.order):
-            first, second = self.order[index-1], self.order[index]
-
-            if first == 'index':
-                first = goTo
-
-            elif second == 'index':
-                second = goTo
-
-            self.sequence.setSequencingGoto(first, second)
-
-        return
 
 class RabiPulse(PulseBuilder):
     '''Defined for unique experiment'''
@@ -44,22 +24,32 @@ class RabiPulse(PulseBuilder):
         self.primaryVector = primaryVector
 
     def measureElem(self, duration):
-        elem, stop = sequencer.buildVectorElement(sequencer.buildSegmentJump, self.origin, duration, 0, self.chs, self.primaryVector, marker1=[0.0])
+        elem, stop = self.sequencer.buildVectorElement(self.sequencer.buildSegmentJump,
+                                                  self.origin,
+                                                  duration,
+                                                  0,
+                                                  self.chs,
+                                                  self.primaryVector,
+                                                  marker1=[0.0])
         return elem, stop
 
     def unloadElem(self, duration, amp):
-        elem, stop = sequencer.buildVectorElement(sequencer.buildSegmentJump, self.origin, duration, amp,
-                                                  self.chs, -self.primaryVector)
+        elem, stop = self.sequencer.buildVectorElement(self.sequencer.buildSegmentJump,
+                                                  self.origin,
+                                                  duration,
+                                                  amp,
+                                                  self.chs,
+                                                  -self.primaryVector)
         return elem, stop
 
     def varyElem(self, duration):
         bps = []
         stops = []
         for start, ch in zip(self.origin, self.chs):
-            bp, stop = sequencer.buildSegmentRamp(start, start, duration, name='vary{}ch'.format(ch))
+            bp, stop = self.sequencer.buildSegmentRamp(start, start, duration, name='vary{}ch'.format(ch))
             bps.append(bp)
             stops.append(stop)
-        elem = sequencer.buildElement(bps, self.chs)
+        elem = self.sequencer.buildElement(bps, self.chs)
 
         return elem, stop
 
@@ -103,39 +93,40 @@ class RabiPulse(PulseBuilder):
 
         return newseq
 
-bb_ramp = bb.PulseAtoms.ramp
-
-sequencer = Sequencer()
-bluep, stop = sequencer.buildSegmentRamp(0, 1, 10e-6, wait=10e-6)
-bluep2, stop = sequencer.buildSegmentJump(stop, 3, 10e-6, wait=10e-6)
-bluep3, stop = sequencer.buildSegmentJumpAndBack(stop, 2, 10e-6, wait=10e-6)
-
-bp = bluep + bluep2 + bluep3
-
-elem = sequencer.buildElement([bp], [1])
-
-plotter(elem)
-
-chs = [1,2]
-origin = [0,0]
-primaryVector = np.array([1,1])
-rabi = RabiPulse(chs, sequencer, origin, primaryVector)
-
-measElem, _ = rabi.measureElem(10e-6)
-unloadElem, _ = rabi.unloadElem(20e-6, 1)
-varyElem, _ = rabi.varyElem(20e-6)
-
-seq = bb.Sequence()
-
-seq.addElement(1, unloadElem)
-seq.addElement(2, varyElem)
-seq.addElement(3, measElem)
-
-seq.setSR(rabi.sequencer.sampleRate)
-seq.checkConsistency()
-
-plotter(seq)
-plt.show()
+# bb_ramp = bb.PulseAtoms.ramp
+#
+# sequencer = Sequencer()
+# bluep, stop = sequencer.buildSegmentRamp(0, 1, 10e-6, wait=10e-6)
+# bluep2, stop = sequencer.buildSegmentJump(stop, 3, 10e-6, wait=10e-6)
+# bluep3, stop = sequencer.buildSegmentJumpAndBack(stop, 2, 10e-6, wait=10e-6)
+#
+# bp = bluep + bluep2 + bluep3
+#
+# elem = sequencer.buildElement([bp], [1])
+#
+# plotter(elem)
+#
+# chs = [1,2]
+# origin = [0,0]
+# primaryVector = np.array([1,1])
+# rabi = RabiPulse(chs, sequencer, origin, primaryVector)
+#
+# measElem, _ = rabi.measureElem(10e-6)
+# unloadElem, _ = rabi.unloadElem(20e-6, 1)
+# varyElem, _ = rabi.varyElem(20e-6)
+#
+# seq = bb.Sequence()
+#
+# #seq.addElement(1, unloadElem)
+# #seq.addElement(2, measElem)
+# seq.addElement(1, varyElem)
+#
+#
+# seq.setSR(rabi.sequencer.sampleRate)
+# seq.checkConsistency()
+#
+# plotter(seq)
+# plt.show()
 #
 # detunings = np.linspace(1.0, 2.5, 3)
 # durations = np.linspace(10e-9, 500e-9, 3)
