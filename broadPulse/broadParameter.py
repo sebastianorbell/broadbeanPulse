@@ -8,12 +8,11 @@ from qcodes import Parameter
 from inspect import signature
 from pathlib import Path
 import json
-import numpy as np
 import matplotlib.pyplot as plt
 
 from broadbean import Sequence
-from constructSequence import Sequencer, PulseBuilder
-from jeanIST import RabiPulse
+from broadPulse.broadSequence import Sequencer
+from broadPulse.broadExchange import ExchangePulse
 
 try:
     from broadbean.plotting import plotter
@@ -153,7 +152,7 @@ class PulseClass(Sequence):
                  'amp': self.measureAmp()}
         }
 
-        rabi = RabiPulse(self.chs(), sequencer, self.origin(), config)
+        rabi = ExchangePulse(self.chs(), sequencer, self.origin(), config)
 
         seq = rabi.createExchangePulse(self.exchangeAmp(), self.exchangeDuration())
 

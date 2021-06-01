@@ -3,7 +3,7 @@ Created on 08/04/2021
 @author sebastian
 """
 import broadbean as bb
-from constructSequence import Sequencer, SequenceParamterClass, PulseBuilder
+from broadPulse.broadSequence import Sequencer, PulseBuilder
 from qcodes.instrument.parameter import Parameter
 
 try:
@@ -12,10 +12,9 @@ except:
     plotter = bb.plotter
 
 import numpy as np
-import matplotlib.pyplot as plt
 
 
-class RabiPulse(PulseBuilder):
+class ExchangePulse(PulseBuilder):
     '''Defined for unique experiment'''
     def __init__(self, chs, sequencer, origin, config):
         super().__init__(
@@ -121,7 +120,7 @@ config = {
         {'duration': 5e-8},
 }
 
-rabi = RabiPulse(chs, sequencer, origin, config)
+rabi = ExchangePulse(chs, sequencer, origin, config)
 
 seq = rabi.createExchangePulse(3e-2,1e-8)
 
@@ -134,17 +133,3 @@ for t in durations:
     for e in detunings:
         seq = rabi.createExchangePulse(e, t)
         plotter(seq)
-
-# new_seq = rabi.vary_base_sequence(seq, 'vary', primaryVector, detunings, durations)
-#
-# length = np.size(durations)*np.size(detunings)
-# new_seq.addElement(length+1, measElem)
-# new_seq.addElement(length+2, unloadElem)
-#
-# order = [length+1, 'index', length+2]
-# seqParam = SequenceParamterClass('Seq', new_seq, order)
-#
-# for i in range(length):
-#     seqParam.set_raw(i+1)
-#     plotter(new_seq)
-#     plt.show()
