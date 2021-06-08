@@ -47,27 +47,27 @@ class ExchangePulse(PulseBuilder):
             self.config.get('measure').get('amp'))
 
     def _createUnloadElem(self, duration, amp, start):
-        elem, stop = sequencer.buildVectorElement(sequencer.buildSegmentJumpAndBack, start, duration, amp,
+        elem, stop = self.sequencer.buildVectorElement(self.sequencer.buildSegmentJumpAndBack, start, duration, amp,
                                                   self.chs, -self.primaryVector)
         return elem, stop
 
     def _createPiHalfElem(self, duration, amp, start):
-        elem, stop = sequencer.buildVectorElement(sequencer.buildSegmentRamp, start, duration, amp,
+        elem, stop = self.sequencer.buildVectorElement(self.sequencer.buildSegmentRamp, start, duration, amp,
                                                   self.chs, self.primaryVector)
         return elem, stop
 
     def _createExchangeElem(self, duration, amp, start):
-        elem, stop = sequencer.buildVectorElement(sequencer.buildSegmentJumpAndBack, start, duration, amp,
+        elem, stop = self.sequencer.buildVectorElement(self.sequencer.buildSegmentJumpAndBack, start, duration, amp,
                                                   self.chs, self.primaryVector)
         return elem, stop
 
     def _createReversePiHalfElem(self, duration, amp, start):
-        elem, stop = sequencer.buildVectorElement(sequencer.buildSegmentRamp, start, duration, amp,
+        elem, stop = self.sequencer.buildVectorElement(self.sequencer.buildSegmentRamp, start, duration, amp,
                                                   self.chs, -self.primaryVector)
         return elem, stop
 
     def _createMeasureElem(self, duration, amp):
-        elem, stop = sequencer.buildVectorElement(sequencer.buildSegmentJump, self.origin, duration, amp, self.chs, self.primaryVector, marker1=[0.0])
+        elem, stop = self.sequencer.buildVectorElement(self.sequencer.buildSegmentJump, self.origin, duration, amp, self.chs, self.primaryVector, marker1=[0.0])
         return elem, stop
 
     def createExchangePulse(self, amplitude, duration):
@@ -103,33 +103,35 @@ class SequenceParamterClass(Parameter):
         self.awg.save_and_load(*package[:])
         return
 
-sequencer = Sequencer()
 
-chs = [1,2]
-origin = [0,0]
+if __name__=='__main__':
+    sequencer = Sequencer()
 
-config = {
-    'primaryvector':[1,1],
-    'unload':
-        {'duration':1e-8,
-            'amp':1e-1},
-    'pihalf':
-        {'duration': 1e-8,
-         'amp': 5e-1},
-    'measure':
-        {'duration': 5e-8},
-}
+    chs = [1,2]
+    origin = [0,0]
 
-rabi = ExchangePulse(chs, sequencer, origin, config)
+    config = {
+        'primaryvector':[1,1],
+        'unload':
+            {'duration':1e-8,
+                'amp':1e-1},
+        'pihalf':
+            {'duration': 1e-8,
+             'amp': 5e-1},
+        'measure':
+            {'duration': 5e-8},
+    }
 
-seq = rabi.createExchangePulse(3e-2,1e-8)
+    rabi = ExchangePulse(chs, sequencer, origin, config)
 
-plotter(seq)
+    seq = rabi.createExchangePulse(3e-2,1e-8)
 
-detunings = np.linspace(1.0, 2.5, 3)
-durations = np.linspace(10e-9, 500e-9, 3)
+    plotter(seq)
 
-for t in durations:
-    for e in detunings:
-        seq = rabi.createExchangePulse(e, t)
-        plotter(seq)
+    detunings = np.linspace(1.0, 2.5, 3)
+    durations = np.linspace(10e-9, 500e-9, 3)
+
+    for t in durations:
+        for e in detunings:
+            seq = rabi.createExchangePulse(e, t)
+            plotter(seq)

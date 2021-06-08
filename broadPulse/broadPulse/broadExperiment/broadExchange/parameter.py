@@ -10,6 +10,7 @@ from pathlib import Path
 import json
 import matplotlib.pyplot as plt
 
+import broadbean as bb
 from broadbean import Sequence
 from broadPulse.broadPulse.broadSequence import Sequencer
 from broadPulse.broadPulse.broadExperiment.broadExchange.pulse import ExchangePulse
@@ -21,14 +22,19 @@ except:
 
 class ExchangeParameter(Sequence):
 
-    def __init__(self, additional_options=None, options_path=Path(__file__).parent / 'pulseClass.json', **kwargs):
+    def __init__(self, options_path='pulseClass.json', **kwargs):
 
-        self.options_path = options_path
+        self.configDir = Path(__file__).parent / 'configs'
+        self.options_path = self.configDir / options_path
 
-        with open(options_path) as f:
+        print(self.options_path)
+
+        with open(self.options_path) as f:
             self.options = json.load(f)
 
-        self.options = {**self.options, **additional_options}
+        self.options = {**self.options}
+
+        print(self.options)
 
         self.name = 'jeanSequence.seqx'
 
@@ -38,6 +44,16 @@ class ExchangeParameter(Sequence):
                                             set_cmd=lambda x: self.create_waveform(
                                                 primaryVector=x
                                             ))
+
+        self.leverArm = Parameter(name='leverArm',
+                                       set_cmd=lambda x: self.create_waveform(
+                                           leverArm=x
+                                       ))
+
+        self.attenuation = Parameter(name='attenuation',
+                                       set_cmd=lambda x: self.create_waveform(
+                                           attenuation=x
+                                       ))
 
         self.unloadDuration = Parameter(name='unloadDuration',
                                    set_cmd=lambda x: self.create_waveform(
@@ -89,18 +105,17 @@ class ExchangeParameter(Sequence):
                                          origin=x
                                      ))
 
+        self.plot = Parameter(name="plot",
+                              initial_value=False,
+                              set_cmd=lambda *args: None)
+
         self.upload = Parameter(
             name='upload',
             set_cmd=lambda *args: None
         )
 
-        self.plot = Parameter(name="plot",
-                              initial_value=False,
-                              set_cmd=lambda *args: None)
-
         self.create_waveform(
-            **self.options,
-            upload = False
+            **self.options
         )
 
         super().__init__()
@@ -111,6 +126,8 @@ class ExchangeParameter(Sequence):
 
     def create_waveform(self,
                         primaryVector = None,
+                        leverArm = None,
+                        attenuation = None,
                         unloadDuration = None,
                         unloadAmp=None,
                         piHalfDuration=None,
@@ -121,6 +138,7 @@ class ExchangeParameter(Sequence):
                         measureAmp=None,
                         chs=None,
                         origin=None,
+                        plot=None,
                         upload=None
                         ):
 
@@ -138,26 +156,27 @@ class ExchangeParameter(Sequence):
 
         sequencer = Sequencer()
 
+        unloadAmp, piHalfAmp, measureAmp, exchangeAmp = [i*self.leverArm()*self.attenuation() for i in [self.unloadAmp(), self.piHalfAmp(), self.measureAmp(), self.exchangeAmp()]]
 
         config = {
             'primaryvector': self.primaryVector(),
             'unload':
                 {'duration': self.unloadDuration(),
-                 'amp': self.unloadAmp()},
+                 'amp': unloadAmp},
             'pihalf':
                 {'duration': self.piHalfDuration(),
-                 'amp': self.piHalfAmp()},
+                 'amp': piHalfAmp},
             'measure':
                 {'duration': self.measureDuration(),
-                 'amp': self.measureAmp()}
+                 'amp': measureAmp}
         }
 
         rabi = ExchangePulse(self.chs(), sequencer, self.origin(), config)
 
-        seq = rabi.createExchangePulse(self.exchangeAmp(), self.exchangeDuration())
+        seq = rabi.createExchangePulse(exchangeAmp, self.exchangeDuration())
 
         if self.plot():
-            plotter(self, apply_filters=True, apply_delays=True)
+            plotter(seq)
             plt.show()
 
         if self.upload():

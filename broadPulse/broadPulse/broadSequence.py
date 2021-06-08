@@ -23,10 +23,9 @@ class PulseBuilder():
 
 
 class Sequencer():
-    def __init__(self, sampleRate=1e9, markerLength=1e-7, compression=100):
+    def __init__(self, sampleRate=1e9, markerLength=1e-7):
         self.sampleRate = sampleRate
         self.markerLength = markerLength
-        self.compression = compression
 
     def _scale_from_vec(self, vec):
         vec = np.array(vec)

@@ -1,5 +1,7 @@
 {
                       "primaryVector" : [1,1],
+                      "leverArm" : 1,
+                      "attenuation" : 0.01,
                       "unloadDuration" : 1e-6,
                       "unloadAmp" : 1e-3,
                       "piHalfDuration" : 1e-7,
@@ -10,5 +12,6 @@
                       "measureAmp" : 0.0,
                       "chs" : [1,2],
                       "origin" : [0,0],
+                      "plot" : true,
                       "upload" : false
 }
